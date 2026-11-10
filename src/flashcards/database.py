@@ -16,7 +16,7 @@ class DatabaseRequest:
         if script is None:
             script = '''
                 CREATE TABLE IF NOT EXISTS cards(
-                    id_cards INTEGER PRIMARY KEY,
+                    id_card INTEGER PRIMARY KEY,
                     question TEXT,
                     reponse TEXT,
                     probabilite REAL,
@@ -26,12 +26,12 @@ class DatabaseRequest:
                         ON DELETE RESTRICT
                 );
                     CREATE TABLE IF NOT EXISTS themes(
-                        id_themes INTEGER PRIMARY KEY,
+                        id_theme INTEGER PRIMARY KEY,
                         theme TEXT
                     );
 
                     CREATE TABLE IF NOT EXISTS stats(
-                        id_stats INTEGER PRIMARY KEY,
+                        id_stat INTEGER PRIMARY KEY,
                         bonnees_reponse INTEGER,
                         mauvaises_reponses INTEGER,
                         date DATE
@@ -40,8 +40,26 @@ class DatabaseRequest:
         self.conn.commit()
         print("Table créer avec success")
 
+    def add_on_db(self, table, **kwargs):
+        cmd = f'''INSERT INTO {table} ({", ".join(kwargs.keys())})
+            VALUES ({", ".join(["?"] * len(kwargs))});
+        '''
+        self.cursor.execute(cmd, tuple(kwargs.values()))
+        self.conn.commit()
+        print('Les valeurs on bien ete eregistrer dans la base de données')
 
-flascards = DatabaseRequest()
-flascards.create_db()
+if __name__ == "__main__":
+    flascards = DatabaseRequest()
+    flascards.create_db()
+    # flascards.add_on_db('stats', 
+    #                     bonnees_reponse = 5,
+    #                     mauvaises_reponses = 1)
+    # flascards.add_on_db('themes', theme="Culture")
+    # flascards.add_on_db('cards',
+    #                      question="Quelle est la capitale de la France ?",
+    #                     reponse="Paris",
+    #                     probabilite=0.5,
+    #                     id_theme=2
+    #     )
 
     
