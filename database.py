@@ -63,6 +63,16 @@ class DatabaseRequest:
         print("Recuperation effectuer avec succes")
         return res
 
+    def update_db(self, table: str, id:int,   **kwargs):
+        cmd = f'''UPDATE {table} 
+                SET {", ".join([f"{key}=?" for key in kwargs.keys()])}
+                WHERE {'id_'+table[:-1]}=?'''
+
+        values = tuple(kwargs.values()) + (id,)
+        self.cursor.execute(cmd, values)
+        self.conn.commit()
+        print("Mise a jour effectuer avec succes")
+
     def count(self, table: str):
         self.cursor.execute(f'''SELECT COUNT(*) FROM {table}''')
         res = self.cursor.fetchall()
@@ -82,6 +92,11 @@ class DatabaseRequest:
 if __name__ == "__main__":
     flascards = DatabaseRequest()
     flascards.create_db()
+    flascards.update_db(
+    'cards',
+    1,
+    reponse="Réseau de neurones convolutif"
+)
     flascards.get_from_db('cards', id_theme=1)
     flascards.count_deep('cards', id_theme=1)
     # flascards.add_on_db('stats', 
