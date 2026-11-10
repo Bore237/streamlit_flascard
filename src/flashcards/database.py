@@ -1,5 +1,6 @@
 import sqlite3
-from typing import Union, Optional 
+import pandas as pd
+from typing import  Optional 
 
 ## Config databasa
 class DatabaseRequest:
@@ -40,7 +41,10 @@ class DatabaseRequest:
         self.conn.commit()
         print("Table créer avec success")
 
-    def add_on_db(self, table, **kwargs):
+    def add_on_db(self, table: str, **kwargs):
+        """
+        Add element into database
+        """
         cmd = f'''INSERT INTO {table} ({", ".join(kwargs.keys())})
             VALUES ({", ".join(["?"] * len(kwargs))});
         '''
@@ -48,9 +52,60 @@ class DatabaseRequest:
         self.conn.commit()
         print('Les valeurs on bien ete eregistrer dans la base de données')
 
+    def get_from_db(self, table: str, **kwargs):
+        cmd = f'''SELECT * FROM {table}'''
+
+        if kwargs:
+            cmd += f''' WHERE {" AND ".join([f"{key}=?" for key in kwargs.keys()])}'''
+
+        self.cursor.execute(cmd, tuple(kwargs.values()))
+        res = self.cursor.fetchall()
+        print("Recuperation effectuer avec succes")
+        return res
+
+    def update_item(self, table: str, id:int,   **kwargs):
+        cmd = f'''UPDATE {table} 
+                SET {", ".join([f"{key}=?" for key in kwargs.keys()])}
+                WHERE {'id_'+table[:-1]}=?'''
+
+        values = tuple(kwargs.values()) + (id,)
+        self.cursor.execute(cmd, values)
+        self.conn.commit()
+        print("Mise a jour effectuer avec succes")
+
+    def delete_id(self, table: str, id: int):
+        cmd = f'''DELETE * FROM {table} WHERE {"id_" + table[:-1]} = ?'''
+
+        self.cursor.execute(cmd, (id,))
+        self.conn.commit()
+        print(f"Spression de ID: {id} dans la table {table}")
+    
+    def count(self, table: str):
+        self.cursor.execute(f'''SELECT COUNT(*) FROM {table}''')
+        res = self.cursor.fetchall()
+        print(f"Les nombre element dans le table {table} est: {res[0][0]}")
+
+    def count_deep(self, table: str, **kwargs):
+        cmd = f'''SELECT COUNT(*) FROM {table}'''
+
+        if kwargs:
+            cmd += f''' WHERE {" AND ".join([f"{key}=?" for key in kwargs.keys()])}'''
+        
+        self.cursor.execute(cmd, tuple(kwargs.values()))
+        res = self.cursor.fetchall()
+        print(f"Les nombre element dans le table {table} qui respecte la condition est de : {res[0][0]}")
+
+# 
 if __name__ == "__main__":
     flascards = DatabaseRequest()
     flascards.create_db()
+    flascards.update_item(
+    'cards',
+    1,
+    reponse="Réseau de neurones convolutif"
+)
+    flascards.get_from_db('cards', id_theme=1)
+    flascards.count_deep('cards', id_theme=1)
     # flascards.add_on_db('stats', 
     #                     bonnees_reponse = 5,
     #                     mauvaises_reponses = 1)
