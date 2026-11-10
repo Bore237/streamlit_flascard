@@ -63,11 +63,27 @@ class DatabaseRequest:
         print("Recuperation effectuer avec succes")
         return res
 
+    def count(self, table: str):
+        self.cursor.execute(f'''SELECT COUNT(*) FROM {table}''')
+        res = self.cursor.fetchall()
+        print(f"Les nombre element dans le table {table} est: {res[0][0]}")
+
+    def count_deep(self, table: str, **kwargs):
+        cmd = f'''SELECT COUNT(*) FROM {table}'''
+
+        if kwargs:
+            cmd += f''' WHERE {" AND ".join([f"{key}=?" for key in kwargs.keys()])}'''
+        
+        self.cursor.execute(cmd, tuple(kwargs.values()))
+        res = self.cursor.fetchall()
+        print(f"Les nombre element dans le table {table} qui respecte la condition est de : {res[0][0]}")
+
 
 if __name__ == "__main__":
     flascards = DatabaseRequest()
     flascards.create_db()
     flascards.get_from_db('cards', id_theme=1)
+    flascards.count_deep('cards', id_theme=1)
     # flascards.add_on_db('stats', 
     #                     bonnees_reponse = 5,
     #                     mauvaises_reponses = 1)
