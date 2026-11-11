@@ -56,7 +56,8 @@ class DatabaseRequest:
         '''
         self.cursor.execute(cmd, tuple(kwargs.values()))
         self.conn.commit()
-        print('Les valeurs on bien ete eregistrer dans la base de données')
+        print('''Les valeurs on bien ete eregistrer dans la base de données
+            Nombre de lignes modifiées : {self.cursor.rowcount}''')
 
     def get_from_db(self, table: str, **kwargs):
         cmd = f'''SELECT * FROM {table}'''
@@ -74,15 +75,19 @@ class DatabaseRequest:
         print("Recuperation effectuer avec succes")
         return pd.DataFrame(res, columns=columns)
 
-    def update_item(self, table: str, id:int,   **kwargs):
-        cmd = f'''UPDATE {table} 
-                SET {", ".join([f"{key}=?" for key in kwargs.keys()])}
-                WHERE {'id_'+table[:-1]}=?'''
+    def update_item(self, table: str, id_value:int,   **kwargs):
 
-        values = tuple(kwargs.values()) + (id,)
+        id_value = int(id_value)
+        cleaned_kwargs = {k: (int(v) if hasattr(v, "item") else v) for k, v in kwargs.items()}
+        cmd = f'''UPDATE {table} 
+                SET {", ".join([f"{key} = ?" for key in kwargs.keys()])}
+                WHERE {'id_' + table[:-1]} = ?'''
+
+        values = tuple(cleaned_kwargs.values()) + (id_value,)
         self.cursor.execute(cmd, values)
         self.conn.commit()
-        print(f"Mise a jour de la table: {table} effectuer avec succes")
+        print(f'''Mise a jour de la table: {table} effectuer avec succes
+            Nombre de lignes modifiées : {self.cursor.rowcount}''')
 
     def delete_id(self, table: str, id: int):
         cmd = f'''DELETE FROM {table} WHERE {"id_" + table[:-1]} = ?'''
