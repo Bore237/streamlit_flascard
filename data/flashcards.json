@@ -1,0 +1,262 @@
+{
+    "themes": [
+        {
+            "id_theme": 1,
+            "theme": "Deep Learning"
+        },
+        {
+            "id_theme": 2,
+            "theme": "Maintenance biomédicale"
+        },
+        {
+            "id_theme": 3,
+            "theme": "Qualité des dispositifs médicaux"
+        },
+        {
+            "id_theme": 4,
+            "theme": "Culture générale"
+        }
+    ],
+    "cards": [
+        {
+            "question": "Qu'est-ce que le deep learning ?",
+            "reponse": "Le deep learning est une branche du machine learning qui utilise des réseaux de neurones comportant plusieurs couches pour apprendre des représentations à partir de données.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "Qu'est-ce qu'un neurone artificiel ?",
+            "reponse": "C'est une unité de calcul qui combine des entrées avec des poids, ajoute un biais puis applique une fonction d'activation.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "À quoi sert une fonction d'activation ?",
+            "reponse": "Elle introduit de la non-linéarité dans le réseau, ce qui lui permet d'apprendre des relations complexes.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "Quelle est la différence entre apprentissage supervisé et non supervisé ?",
+            "reponse": "En supervisé, les données d'entraînement comportent des étiquettes. En non supervisé, le modèle cherche des structures dans des données non étiquetées.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "À quoi sert un jeu de données de validation ?",
+            "reponse": "Il sert à suivre les performances pendant l'entraînement et à régler les hyperparamètres sans utiliser le jeu de test final.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "Qu'est-ce que le surapprentissage (overfitting) ?",
+            "reponse": "C'est lorsqu'un modèle apprend trop précisément les données d'entraînement et généralise mal sur de nouvelles données.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "À quoi sert la rétropropagation du gradient ?",
+            "reponse": "Elle calcule les gradients de la fonction de perte par rapport aux paramètres du réseau afin de permettre leur mise à jour.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "Quel est le rôle d'un réseau de neurones convolutif (CNN) ?",
+            "reponse": "Un CNN extrait notamment des caractéristiques spatiales et locales. Il est très utilisé pour l'analyse d'images.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "Qu'est-ce qu'une époque (epoch) en entraînement ?",
+            "reponse": "Une époque correspond à un passage complet de l'ensemble des données d'entraînement dans le modèle.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "À quoi sert le taux d'apprentissage (learning rate) ?",
+            "reponse": "Il contrôle l'amplitude des mises à jour des paramètres pendant l'optimisation. Une valeur mal choisie peut ralentir ou déstabiliser l'entraînement.",
+            "probabilite": 0.5,
+            "id_theme": 1
+        },
+        {
+            "question": "Quelle est la différence entre maintenance préventive et corrective ?",
+            "reponse": "La maintenance préventive est réalisée pour réduire la probabilité d'une panne. La maintenance corrective intervient après la détection d'une défaillance.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Quel est l'objectif de la maintenance biomédicale ?",
+            "reponse": "Elle vise à maintenir les équipements médicaux sûrs, disponibles et performants, conformément aux exigences applicables et aux recommandations du fabricant.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Qu'est-ce qu'un dispositif médical ?",
+            "reponse": "C'est un instrument, appareil, équipement, logiciel ou autre article destiné par son fabricant à une finalité médicale chez l'être humain, selon la définition réglementaire applicable.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Pourquoi tracer les interventions de maintenance ?",
+            "reponse": "La traçabilité permet de connaître l'historique de l'équipement, les opérations réalisées, les pièces remplacées, les contrôles et les personnes intervenantes.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Que doit-on faire avant une intervention sur un équipement médical ?",
+            "reponse": "Il faut identifier l'équipement, sécuriser la situation, appliquer les consignes du fabricant et les procédures de l'établissement, puis vérifier les risques liés à l'intervention.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Qu'est-ce qu'une maintenance curative ?",
+            "reponse": "C'est une intervention corrective destinée à remettre un équipement en état de fonctionnement après une panne ou une défaillance.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Pourquoi effectuer des contrôles après une réparation ?",
+            "reponse": "Pour vérifier que l'équipement fonctionne correctement et que ses performances et sa sécurité sont acceptables avant sa remise en service.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Qu'est-ce que la disponibilité d'un équipement ?",
+            "reponse": "C'est son aptitude à être en état de fonctionner lorsqu'il est requis, dans les conditions prévues.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "À quoi sert un inventaire biomédical ?",
+            "reponse": "Il permet d'identifier et de suivre le parc d'équipements : localisation, fabricant, modèle, numéro de série, statut et historique de maintenance.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "Que signifie mettre un équipement hors service ?",
+            "reponse": "Cela signifie empêcher son utilisation lorsqu'un défaut, un risque ou une opération de maintenance le nécessite, en signalant clairement son statut selon la procédure locale.",
+            "probabilite": 0.5,
+            "id_theme": 2
+        },
+        {
+            "question": "À quoi sert la norme ISO 13485 ?",
+            "reponse": "Elle définit les exigences d'un système de management de la qualité pour les organisations intervenant dans le cycle de vie des dispositifs médicaux.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Quel est l'objectif de la norme ISO 14971 ?",
+            "reponse": "Elle décrit un processus de gestion des risques liés aux dispositifs médicaux tout au long de leur cycle de vie.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Qu'est-ce que la traçabilité d'un dispositif médical ?",
+            "reponse": "C'est la capacité à retrouver son historique, son utilisation ou sa localisation au moyen d'informations et d'enregistrements adaptés.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Qu'est-ce qu'une non-conformité ?",
+            "reponse": "C'est le non-respect d'une exigence spécifiée, qu'elle soit réglementaire, normative, interne ou définie dans une procédure.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Quelle est la différence entre correction et action corrective ?",
+            "reponse": "La correction traite la non-conformité détectée. L'action corrective vise à éliminer sa cause afin d'éviter qu'elle ne se reproduise.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Qu'est-ce que la matériovigilance ?",
+            "reponse": "C'est la surveillance des incidents ou risques d'incidents liés à l'utilisation des dispositifs médicaux, afin de prévenir leur répétition et protéger les patients.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Que signifie CAPA dans un système qualité ?",
+            "reponse": "CAPA signifie Corrective and Preventive Actions, soit actions correctives et préventives dans le vocabulaire qualité.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Pourquoi contrôler les fournisseurs de dispositifs médicaux ?",
+            "reponse": "Pour s'assurer que les produits et services achetés répondent aux exigences définies et ne compromettent pas la conformité ou la sécurité.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Qu'est-ce qu'un audit qualité ?",
+            "reponse": "C'est une évaluation méthodique et documentée visant à déterminer si les activités et résultats satisfont aux critères d'audit.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "À quoi sert le marquage CE d'un dispositif médical ?",
+            "reponse": "Il indique que le fabricant déclare la conformité du dispositif aux exigences européennes applicables. Il ne constitue pas une garantie absolue d'absence de risque.",
+            "probabilite": 0.5,
+            "id_theme": 3
+        },
+        {
+            "question": "Quelle est la capitale du Canada ?",
+            "reponse": "Ottawa.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Quel est le symbole chimique de l'oxygène ?",
+            "reponse": "O.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Combien de côtés possède un hexagone ?",
+            "reponse": "Six côtés.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Quelle planète est surnommée la planète rouge ?",
+            "reponse": "Mars.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Qui a écrit Les Misérables ?",
+            "reponse": "Victor Hugo.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Quel organe pompe le sang dans le corps humain ?",
+            "reponse": "Le cœur.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Quelle est l'unité SI de la fréquence ?",
+            "reponse": "Le hertz (Hz).",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "En quelle année l'homme a-t-il marché pour la première fois sur la Lune ?",
+            "reponse": "En 1969, lors de la mission Apollo 11.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Quel gaz les plantes absorbent-elles principalement pour la photosynthèse ?",
+            "reponse": "Le dioxyde de carbone (CO₂).",
+            "probabilite": 0.5,
+            "id_theme": 4
+        },
+        {
+            "question": "Combien de minutes y a-t-il dans une heure ?",
+            "reponse": "Soixante minutes.",
+            "probabilite": 0.5,
+            "id_theme": 4
+        }
+    ]
+}

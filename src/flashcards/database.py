@@ -1,14 +1,20 @@
 import sqlite3
 import pandas as pd
 from typing import  Optional 
+from pathlib import Path
+import json
 
 ## Config databasa
 class DatabaseRequest:
-    def __init__(self, name_database: str = "flashcards.db"):
+    def __init__(self, name_database: str = "flashcards.db", json_path: Optional[Path] = None):
         self.conn = sqlite3.connect(name_database)
         self.cursor = self.conn.cursor()
         self.cursor.execute("PRAGMA foreign_keys = ON;")
         print(f'Connexion reuissite a la db {name_database}')
+
+        if json_path:
+            self.create_db()
+            self.load_db(json_path)
 
     def create_db(self, script: Optional[str] = None):
         """
@@ -71,14 +77,15 @@ class DatabaseRequest:
         values = tuple(kwargs.values()) + (id,)
         self.cursor.execute(cmd, values)
         self.conn.commit()
-        print("Mise a jour effectuer avec succes")
+        print(f"Mise a jour de la table: {table} effectuer avec succes")
 
     def delete_id(self, table: str, id: int):
-        cmd = f'''DELETE * FROM {table} WHERE {"id_" + table[:-1]} = ?'''
+        cmd = f'''DELETE FROM {table} WHERE {"id_" + table[:-1]} = ?'''
 
+        print(cmd)
         self.cursor.execute(cmd, (id,))
         self.conn.commit()
-        print(f"Spression de ID: {id} dans la table {table}")
+        print(f"Supression de ID: {id} dans la table {table}")
     
     def count(self, table: str):
         self.cursor.execute(f'''SELECT COUNT(*) FROM {table}''')
@@ -95,17 +102,32 @@ class DatabaseRequest:
         res = self.cursor.fetchall()
         print(f"Les nombre element dans le table {table} qui respecte la condition est de : {res[0][0]}")
 
+    def load_db(self, json_path):
+        with open(json_path, 'r') as f:
+            data = json.load(f)
+
+        #inser themes
+
+        try:
+            for key, values in data.items():
+                for value in values:
+                    self.add_on_db(key, **value)
+
+            self.conn.commit()
+            print("Importation réussie !")
+
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Erreur lors de l'importation : {e}")
+
+
+
 # 
 if __name__ == "__main__":
-    flascards = DatabaseRequest()
-    flascards.create_db()
-    flascards.update_item(
-    'cards',
-    1,
-    reponse="Réseau de neurones convolutif"
-)
-    flascards.get_from_db('cards', id_theme=1)
-    flascards.count_deep('cards', id_theme=1)
+    flascards = DatabaseRequest(json_path=Path("data/flashcards.json"))
+    # flascards.create_db()
+    # flascards.get_from_db('cards', id_theme=1)
+    # flascards.update_item('cards', 1, reponse="Réseau de neurones convolutif")
     # flascards.add_on_db('stats', 
     #                     bonnees_reponse = 5,
     #                     mauvaises_reponses = 1)
