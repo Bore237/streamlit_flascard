@@ -66,8 +66,13 @@ class DatabaseRequest:
 
         self.cursor.execute(cmd, tuple(kwargs.values()))
         res = self.cursor.fetchall()
+
+        # get colonm info from the table
+        self.cursor.execute(f"PRAGMA table_info({table})")
+        columns = [column[1] for column in self.cursor.fetchall()]
+
         print("Recuperation effectuer avec succes")
-        return res
+        return pd.DataFrame(res, columns=columns)
 
     def update_item(self, table: str, id:int,   **kwargs):
         cmd = f'''UPDATE {table} 
@@ -107,7 +112,6 @@ class DatabaseRequest:
             data = json.load(f)
 
         #inser themes
-
         try:
             for key, values in data.items():
                 for value in values:
@@ -120,13 +124,11 @@ class DatabaseRequest:
             self.conn.rollback()
             print(f"Erreur lors de l'importation : {e}")
 
-
-
 # 
 if __name__ == "__main__":
     flascards = DatabaseRequest(json_path=Path("data/flashcards.json"))
     # flascards.create_db()
-    # flascards.get_from_db('cards', id_theme=1)
+    flascards.get_from_db('cards', id_theme=1)
     # flascards.update_item('cards', 1, reponse="Réseau de neurones convolutif")
     # flascards.add_on_db('stats', 
     #                     bonnees_reponse = 5,
