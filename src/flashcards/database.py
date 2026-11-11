@@ -39,9 +39,9 @@ class DatabaseRequest:
 
                     CREATE TABLE IF NOT EXISTS stats(
                         id_stat INTEGER PRIMARY KEY,
-                        bonnees_reponse INTEGER,
+                        bonnes_reponses INTEGER,
                         mauvaises_reponses INTEGER,
-                        date DATE
+                        date DATE UNIQUE NOT NULL
                     );'''
         self.cursor.executescript(script)
         self.conn.commit()
