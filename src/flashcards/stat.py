@@ -113,7 +113,6 @@ class StatTools:
                     nouvelle_probabilité =  max(0.1, min(proba *  1.1, 1.0)) 
                     self.db.update_item('cards', data['id_card'][0], probabilite = nouvelle_probabilité)
         except Exception as e:
-            self.db.conn.rollback()
             logger.error("Erreur lors de la mise a jours des probabilité", e)
         
 

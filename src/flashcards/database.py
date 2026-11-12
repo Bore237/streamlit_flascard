@@ -24,66 +24,69 @@ Example:
 
 import sqlite3
 import pandas as pd
-from typing import  Optional, List, Any
+from typing import Optional, List, Any
 from pathlib import Path
 import json
 from flashcards.logger import get_log
 
 logger = get_log(__name__)
 
-## Config databasa
 class DatabaseRequest:
     def __init__(self, name_database: str = "flashcards.db", json_path: Optional[Path] = None):
-        self.conn = sqlite3.connect(name_database)
-        self.cursor = self.conn.cursor()
-        self.cursor.execute("PRAGMA foreign_keys = ON;")
-        logger.info(f'Connexion reuissite a la db {name_database}')
+        self.name_database = name_database
+        logger.info(f'Initialisation de la base de données {name_database}')
 
         if json_path:
             self.create_db()
             self.load_db(json_path)
 
+    def _get_connection(self):
+        """Helper to open a thread-safe connection with foreign keys enabled."""
+        conn = sqlite3.connect(self.name_database)
+        conn.execute("PRAGMA foreign_keys = ON;")
+        return conn
+
     def create_db(self, script: Optional[str] = None) -> None:
         """
-        Create db with type: NULL, INTEGER, REAL, DATA, TEXT et BLOB.
+        Create db with types: NULL, INTEGER, REAL, TEXT, and BLOB.
         
         Args:
-        script (Optional[str]): SQL script used to create the database.
+            script (Optional[str]): SQL script used to create the database.
 
         Returns:
             None
         """
+        if script is None:
+            script = '''
+                CREATE TABLE IF NOT EXISTS cards(
+                    id_card INTEGER PRIMARY KEY,
+                    question TEXT,
+                    reponse TEXT,
+                    probabilite REAL,
+                    id_theme INTEGER,
+                    FOREIGN KEY (id_theme)
+                        REFERENCES themes(id_theme)
+                        ON DELETE RESTRICT
+                );
+                CREATE TABLE IF NOT EXISTS themes(
+                    id_theme INTEGER PRIMARY KEY,
+                    theme TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS stats(
+                    id_stat INTEGER PRIMARY KEY,
+                    bonnes_reponses INTEGER,
+                    mauvaises_reponses INTEGER,
+                    date DATE UNIQUE NOT NULL
+                );'''
+        
         try:
-            if script is None:
-                script = '''
-                    CREATE TABLE IF NOT EXISTS cards(
-                        id_card INTEGER PRIMARY KEY,
-                        question TEXT,
-                        reponse TEXT,
-                        probabilite REAL,
-                        id_theme INTEGER,
-                        FOREIGN KEY (id_theme)
-                            REFERENCES themes(id_theme)
-                            ON DELETE RESTRICT
-                    );
-                        CREATE TABLE IF NOT EXISTS themes(
-                            id_theme INTEGER PRIMARY KEY,
-                            theme TEXT
-                        );
-
-                        CREATE TABLE IF NOT EXISTS stats(
-                            id_stat INTEGER PRIMARY KEY,
-                            bonnes_reponses INTEGER,
-                            mauvaises_reponses INTEGER,
-                            date DATE UNIQUE NOT NULL
-                        );'''
-            self.cursor.executescript(script)
-            self.conn.commit()
-            logger.info("Table créer avec success")
-
+            with self._get_connection() as conn:
+                conn.executescript(script)
+                conn.commit()
+            logger.info("Tables créées avec succès")
         except Exception as e:
-            self.conn.rollback()
-            logger.error("Erreur lors de la création de la base de donnée", e)
+            logger.error("Erreur lors de la création de la base de données", exc_info=e)
 
     def add_on_db(self, table: str, **kwargs) -> None:
         """
@@ -100,14 +103,15 @@ class DatabaseRequest:
             VALUES ({", ".join(["?"] * len(kwargs))});
         '''
         try:
-            self.cursor.execute(cmd, tuple(kwargs.values()))
-            self.conn.commit()
-            logger.info('''Les valeurs on bien ete eregistrer dans la base de données
-                Nombre de lignes modifiées : {self.cursor.rowcount}''')
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(cmd, tuple(kwargs.values()))
+                conn.commit()
+                rowcount = cursor.rowcount
+            logger.info(f"Les valeurs ont bien été enregistrées dans la base de données. Nombre de lignes modifiées : {rowcount}")
         except Exception as e:
-            self.conn.rollback()
-            logger.warning(f"La commande recu est: {cmd} pour la table {table}")
-            logger.error("Erreur lors de inserstion", e)
+            logger.warning(f"La commande reçue est: {cmd} pour la table {table}")
+            logger.error(f"Erreur lors de l'insertion: {e}")
 
     def get_from_db(self, table: str, **kwargs) -> pd.DataFrame:
         """
@@ -121,52 +125,58 @@ class DatabaseRequest:
             pd.DataFrame: DataFrame containing the retrieved records.
         """
         cmd = f'''SELECT * FROM {table}'''
+        res = []
+        columns = []
 
         try:
-            if kwargs:
-                cmd += f''' WHERE {" AND ".join([f"{key}=?" for key in kwargs.keys()])}'''
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                if kwargs:
+                    cmd += f''' WHERE {" AND ".join([f"{key}=?" for key in kwargs.keys()])}'''
 
-            self.cursor.execute(cmd, tuple(kwargs.values()))
-            res = self.cursor.fetchall()
+                cursor.execute(cmd, tuple(kwargs.values()))
+                res = cursor.fetchall()
 
-            # get colonm info from the table
-            self.cursor.execute(f"PRAGMA table_info({table})")
-            columns = [column[1] for column in self.cursor.fetchall()]
+                # Get column info from the table
+                cursor.execute(f"PRAGMA table_info({table})")
+                columns = [column[1] for column in cursor.fetchall()]
+            
+            logger.info("Récupération effectuée avec succès")
         except Exception as e:
-            self.conn.rollback()
-            logger.warning(f"La commande recu est: {cmd} pour la table {table}")
-            logger.error("Erreur lors de la recuperation", e)
+            logger.warning(f"La commande reçue est: {cmd} pour la table {table}")
+            logger.error(f"Erreur lors de la récupération: {e}")
 
-        logger.info("Recuperation effectuer avec succes")
         return pd.DataFrame(res, columns=columns)
 
-    def update_item(self, table: str, id_value:int, **kwargs) -> None:
+    def update_item(self, table: str, id: int, **kwargs) -> None:
         """
         Update an existing record in the specified table using its ID.
 
         Args:
             table (str): Name of the table.
-            id_value (int): ID of the record to update.
+            id (int): ID of the record to update.
             **kwargs: Column names and their updated values.
 
         Returns:
             None
         """
-        id_value = int(id_value)
+        id_value = int(id)
+        id_column = 'id_' + table[:-1]
         cmd = f'''UPDATE {table} 
                 SET {", ".join([f"{key} = ?" for key in kwargs.keys()])}
-                WHERE {'id_' + table[:-1]} = ?'''
+                WHERE {id_column} = ?'''
 
         try:
-            values = tuple(kwargs.values()) + (id_value,)
-            self.cursor.execute(cmd, values)
-            self.conn.commit()
-            logger.info(f'''Mise a jour de la table: {table} effectuer avec succes
-                Nombre de lignes modifiées : {self.cursor.rowcount}''')
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                values = tuple(kwargs.values()) + (id_value,)
+                cursor.execute(cmd, values)
+                conn.commit()
+                rowcount = cursor.rowcount
+            logger.info(f"Mise à jour de la table: {table} effectuée avec succès. Nombre de lignes modifiées : {rowcount}")
         except Exception as e:
-            self.conn.rollback()
-            logger.warning(f"La commande recu est: {cmd} pour la table {table}")
-            logger.error("Erreur lors de la modification", e)
+            logger.warning(f"La commande reçue est: {cmd} pour la table {table}")
+            logger.error(f"Erreur lors de la modification: {e}")
 
     def delete_id(self, table: str, id: int) -> None:
         """
@@ -179,16 +189,18 @@ class DatabaseRequest:
         Returns:
             None
         """
-        cmd = f'''DELETE FROM {table} WHERE {"id_" + table[:-1]} = ?'''
+        id_column = 'id_' + table[:-1]
+        cmd = f'''DELETE FROM {table} WHERE {id_column} = ?'''
 
         try:
-            self.cursor.execute(cmd, (id,))
-            self.conn.commit()
-            logger.info(f"Supression de ID: {id} dans la table {table}")
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(cmd, (id,))
+                conn.commit()
+            logger.info(f"Suppression de l'ID: {id} dans la table {table}")
         except Exception as e:
-            self.conn.rollback()
-            logger.warning(f"La commande recu est: {cmd} pour la table {table}")
-            logger.error("Erreur lors de la supression", e)
+            logger.warning(f"La commande reçue est: {cmd} pour la table {table}")
+            logger.error(f"Erreur lors de la suppression: {e}")
     
     def count(self, table: str) -> int:
         """
@@ -198,18 +210,19 @@ class DatabaseRequest:
             table (str): Name of the table.
 
         Returns:
-            None
+            int: Total count of records.
         """
+        res = [[0]]
         try:
-            self.cursor.execute(f'''SELECT COUNT(*) FROM {table}''')
-            res = self.cursor.fetchall()
-            logger.info(f"Les nombre element dans le table {table} est: {res[0][0]}")
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(f'''SELECT COUNT(*) FROM {table}''')
+                res = cursor.fetchall()
+            logger.info(f"Le nombre d'éléments dans la table {table} est: {res[0][0]}")
         except Exception as e:
-            self.conn.rollback()
-            logger.error(f'Erreur lors du comptage', e)
+            logger.error(f"Erreur lors du comptage: {e}")
         return res[0][0]
 
-    
     def count_deep(self, table: str, **kwargs) -> List[Any]:
         """
         Count the number of records in a table that match the specified conditions.
@@ -219,20 +232,23 @@ class DatabaseRequest:
             **kwargs: Column names and their corresponding filter values.
 
         Returns:
-            tuple: Query result containing the number of matching records.
+            list: Query result containing the number of matching records.
         """
         cmd = f'''SELECT COUNT(*) FROM {table}'''
+        res = [[0]]
 
         if kwargs:
             cmd += f''' WHERE {" AND ".join([f"{key}=?" for key in kwargs.keys()])}'''
+        
         try:
-            self.cursor.execute(cmd, tuple(kwargs.values()))
-            res = self.cursor.fetchall()
-            logger.info(f"Les nombre element dans le table {table} qui respecte la condition est de : {res[0][0]}")
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(cmd, tuple(kwargs.values()))
+                res = cursor.fetchall()
+            logger.info(f"Le nombre d'éléments dans la table {table} qui respectent la condition est de : {res[0][0]}")
         except Exception as e:
-            self.conn.rollback()
-            logger.warning(f"La commande recu est: {cmd} pour la table {table}")
-            logger.error("Erreur lors de la conptage", e)
+            logger.warning(f"La commande reçue est: {cmd} pour la table {table}")
+            logger.error(f"Erreur lors du comptage: {e}")
         
         return res 
     
@@ -246,25 +262,17 @@ class DatabaseRequest:
         Returns:
             None
         """
-        with open(json_path, 'r') as f:
+        with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        #Read Json file and inser element
         try:
             for key, values in data.items():
                 for value in values:
                     self.add_on_db(key, **value)
             logger.info("Importation réussie !")
-
         except Exception as e:
             logger.error(f"Erreur lors de l'importation : {e}")
 
-# 
 if __name__ == "__main__":
-    # flascards.create_db()
-    flascards = DatabaseRequest(json_path=Path("data/flashcards.json"))
-    flascards.get_from_db('cards', id_theme=1)
-    # flascards.update_item('cards', 1, reponse="Réseau de neurones convolutif")
-
-
-    
+    flashcards = DatabaseRequest(json_path=Path("data/flashcards.json"))
+    flashcards.get_from_db('cards', id_theme=1)
