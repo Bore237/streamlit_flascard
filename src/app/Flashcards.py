@@ -4,6 +4,7 @@ from flashcards.stat import StatTools
 import plotly.express as px
 from flashcards.logger import get_log
 import random
+from pathlib import Path
 
 # Configuration de la page (doit être la première commande st.*)
 st.set_page_config(page_title="borel_flashcard", layout="wide")
@@ -17,6 +18,11 @@ if "theme_dict" not in st.session_state:
 
 if "db" not in st.session_state:
     st.session_state.db = DatabaseRequest('flashcards.db')
+    df_theme = st.session_state.db.get_from_db('themes')
+    #load json file if database is empty
+    if df_theme.empty:
+        st.session_state.db.load_db(json_path=Path("data/flashcards.json"))
+        st.rerun()
 
 if "db_stat" not in st.session_state:
     st.session_state.db_stat = StatTools('flashcards.db')
@@ -41,6 +47,7 @@ def get_data():
     return df_theme, total_card, df_cards_all
 
 df_theme, total_card, df_cards_all = get_data()
+
 st.session_state.theme_dict = dict(zip(df_theme['theme'], df_theme['id_theme']))
 
 ## Start design

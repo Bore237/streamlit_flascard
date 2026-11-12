@@ -35,9 +35,9 @@ class DatabaseRequest:
     def __init__(self, name_database: str = "flashcards.db", json_path: Optional[Path] = None):
         self.name_database = name_database
         logger.info(f'Initialisation de la base de données {name_database}')
+        self.create_db()
 
         if json_path:
-            self.create_db()
             self.load_db(json_path)
 
     def _get_connection(self):
