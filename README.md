@@ -18,8 +18,9 @@ A simple and interactive flashcard learning application built with Python, Strea
 ## Getting Started
 
 ```bash
-pip uv sync
-uv run streamlit run app.py
+uv sync
+uv pip install -e .     
+PATHPYTHON=src streamlit run src/app/Flashcards.py
 ```
 
 
